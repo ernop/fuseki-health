@@ -1,0 +1,16 @@
+{
+  "checked_month": "2026-09",
+  "groups": {
+    "availability": {
+      "changed_at": 1790472602,
+      "notified_at": 0,
+      "status": "up"
+    },
+    "disk": {
+      "changed_at": 1790472602,
+      "notified_at": 1790472602,
+      "problem": "tpbeta disk space is LOW",
+      "status": "down"
+    }
+  }
+}
