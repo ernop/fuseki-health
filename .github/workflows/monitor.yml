@@ -1,0 +1,58 @@
+name: Health monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: health-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: alerts
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - name: Test the monitor
+        run: python3 -m unittest -q test_monitor
+
+      - name: Write the monitor configuration
+        env:
+          HEALTH_CONFIG: ${{ secrets.FUSEKI_HEALTH_CONFIG }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          config = json.loads(os.environ['HEALTH_CONFIG'])
+          # The run log is public: mask each private value, not only the whole secret.
+          for value in (config['smtp_password'], config['editor_prefix'].strip('/'),
+                        *config['disk_reader_key'].splitlines()):
+              if value.strip():
+                  print(f'::add-mask::{value.strip()}')
+          path = Path(os.environ['RUNNER_TEMP']) / 'health-config.json'
+          path.write_text(json.dumps(config))
+          path.chmod(0o600)
+          PY
+
+      - name: Check fuseki.net
+        run: python3 monitor.py "$RUNNER_TEMP/health-config.json" status.json
+
+      - name: Record state changes
+        run: |
+          if [ -z "$(git status --porcelain -- status.json)" ]; then exit 0; fi
+          git config user.name "fuseki-health"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add status.json
+          git commit -q -m "Record health state"
+          git push -q
+
+      - name: Remove the configuration
+        if: always()
+        run: rm -f "$RUNNER_TEMP/health-config.json"
