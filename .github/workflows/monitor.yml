@@ -8,9 +8,11 @@ on:
 permissions:
   contents: write
 
+# A newer run cancels an older one, so a run stuck before it starts can never
+# block the schedule.
 concurrency:
   group: health-monitor
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   check:

@@ -39,3 +39,14 @@ python3 -m unittest test_monitor
 
 The workflow runs them before every check; a failing run is itself emailed by
 GitHub to the account that last changed the schedule.
+
+## Stalls
+
+A cancelled run sends no email, so a stalled monitor is silent. From
+2026-09-30 to 2026-10-23 one run sat "waiting" on the `alerts` environment
+(which has no reviewers, so nobody could approve it) and held the workflow's
+concurrency group; all 1,928 later runs were cancelled and nothing was
+checked. Since then (owner decision 2026-10-23) each new run cancels any older
+run in the group (`cancel-in-progress: true`), so a stuck run lasts at most
+until the next schedule. The cost: if two runs ever overlap, the older one is
+cancelled and that one check is skipped.
