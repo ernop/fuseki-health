@@ -7,9 +7,10 @@
       "status": "up"
     },
     "disk": {
-      "changed_at": 1795266765,
-      "notified_at": 1795266765,
-      "status": "up"
+      "changed_at": 1795267785,
+      "notified_at": 1795267785,
+      "problem": "tpbeta disk space is LOW",
+      "status": "down"
     }
   }
 }
