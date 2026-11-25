@@ -8,7 +8,7 @@
     },
     "disk": {
       "changed_at": 1795428823,
-      "notified_at": 1795582523,
+      "notified_at": 1795604282,
       "problem": "tpbeta disk space is LOW",
       "status": "down"
     }
